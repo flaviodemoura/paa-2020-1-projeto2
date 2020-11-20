@@ -223,6 +223,7 @@ Lemma ForallT_insert : forall (V : Type) (P : key -> V -> Prop) (t : tree V),
     ForallT P t -> forall (k : key) (v : V),
       P k v -> ForallT P (insert k v t).
 Proof.
+  
 Admitted.
 
 (** ** Questão 3:  *)
@@ -288,6 +289,24 @@ Admitted.
 (** ** Questão 5:  *)
 (** Enuncie e prove os três teoremas análogos para a função [bound]. *)
 
+Theorem bound_empty : forall (V: Type) (k : key),
+    bound k (@empty_tree V) = false.
+Proof.
+  Admitted.
+
+Theorem bound_insert_eq :
+  forall (V : Type) (t : tree V) (k : key) (v : V),
+    bound k (insert k v t) = true.
+Proof.
+  Admitted.
+
+Theorem bound_insert_neq :
+  forall (V : Type) (t : tree V) (k k' : key) (v : V),
+   k <> k' -> bound k' (insert k v t) = bound k' t.
+Proof.
+ Admitted.
+
+
 (** ** Questão 6:  *)
 (** A relação esperada entre as funções [bound] e [lookup] é que, se [bound k t] retorna [false] então [lookup d k t] retorna o valor default [d]. Prove este fato dado pelo seguinte teorema: *)
 
@@ -296,7 +315,9 @@ Theorem bound_default :
     bound k t = false ->
     lookup d k t = d.
 Proof.
-Admitted.
+  induction t.
+  - admit.
+  - Admitted.
   
 (** * Convertendo BSTs em listas *)
 
@@ -333,7 +354,11 @@ Theorem elements_complete : forall (V : Type) (k : key) (v d : V) (t : tree V),
     lookup d k t = v ->
     In (k, v) (elements t).
 Proof.
-Admitted.      
+  induction t.
+  - intros.
+    simpl in H0.
+    inv H0.
+  - Admitted.      
 
 (** Agora vamos provar que a transformação via [elements] é correta, i.e. se o par [(k,v)] é um elemento de [elements t] então a chave [k] ocorre associada a [v] em [t]. 
 
@@ -355,7 +380,22 @@ Lemma elements_preserves_forall : forall (V : Type) (P : key -> V -> Prop) (t : 
     ForallT P t ->
     Forall (uncurry P) (elements t).
 Proof.
-Admitted.
+  induction t.
+  - intro.
+    simpl.
+    apply Forall_nil.
+  - intro.
+    simpl.
+    inv H.
+    inv H1.
+    apply Forall_app.
+    + apply IHt1.
+      assumption.
+    + apply Forall_cons.
+      * unfold uncurry.
+        assumption.
+      * apply IHt2; assumption.
+Qed.
 
 (** ** Questão 9:  *)
 Theorem elements_correct : forall (V : Type) (k : key) (v d : V) (t : tree V),
@@ -363,12 +403,39 @@ Theorem elements_correct : forall (V : Type) (k : key) (v d : V) (t : tree V),
     In (k, v) (elements t) ->
     bound k t = true /\ lookup d k t = v.
 Proof.
-   Admitted.
+  induction t.
+  - intros.
+    admit.
+  - intros.
+    simpl in H0.
+    inv H.
+    apply elements_preserves_forall in H5.
+    apply elements_preserves_forall in H6.
+    unfold uncurry in *.
+    apply in_app_or in H0.
+    inv H0.
+    + split.
+      * simpl.
+        bdall.
+        ** apply IHt1; assumption.
+        ** assert (H': forall x: (key*V), In x (elements t1) -> ((fun '(a, _) => a < k0) x)).
+      {
+        apply Forall_forall.
+        apply H5.
+      }
+      apply H' in H.
+      admit.
+    + apply in_inv in H1.
+      inv H1.
+      * inv H0.
+        admit.
+      * Admitted.
 
 (** * Uma implementação mais eficiente de [elements] *)
 
 (** ** Questão 10: *)
 (** A implementação de [elements] é eficiente? Qual é a complexidade assintótica [elements t] quando [t] é uma árvore balanceada? E quando [t] é desbalanceada? Esta questão deve ser respondida textualmente em detalhes. *)
+
 
 (** Uma outra forma de transformar uma [BST] em uma lista é dada pela função [elements_tr]: *)
 
